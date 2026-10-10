@@ -163,23 +163,16 @@ export interface AuthLoginRequest {
 }
 
 export interface User {
-  id: string;
   user_id: string;
   email: string;
-  full_name: string;
-  role: "admin" | "editor" | "viewer";
-  is_active: boolean;
-  created_at: string;
-}
-
-export interface UserCreatePayload extends AuthLoginRequest {
-  full_name: string;
-  role: "admin" | "editor" | "viewer";
+  role: string;
+  permissions: string[];
 }
 
 export interface TokenResponse {
   access_token: string;
   token_type: "bearer";
+  expires_in: number;
   user: User;
 }
 
@@ -612,10 +605,21 @@ class ApiClient {
         // ignore parse errors
       }
 
+      if (response.status === 401 && !endpoint.startsWith('/api/auth/login')) {
+        this.endSession();
+      }
+
       throw new Error(message);
     }
 
     return response.json();
+  }
+
+  private endSession() {
+    this.setAuthToken(null);
+    if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+      window.location.assign("/login");
+    }
   }
 
   async getProjects(): Promise<Project[]> {
@@ -769,13 +773,6 @@ class ApiClient {
 
   async login(payload: AuthLoginRequest): Promise<TokenResponse> {
     return this.request<TokenResponse>('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  }
-
-  async registerUser(payload: UserCreatePayload): Promise<User> {
-    return this.request<User>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(payload),
     });

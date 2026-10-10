@@ -9,13 +9,11 @@ import { useAuth } from "@/lib/auth";
 export function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, hasPermissions, logout } = useAuth();
 
   const visibleItems = navigationConfig.filter((item) => {
-    if (!item.roles) return true;
     if (!isAuthenticated) return false;
-    if (!user) return true; // auth disabled → dev mode, show everything
-    return item.roles.includes(user.role);
+    return hasPermissions(item.permissions ?? []);
   });
 
   return (

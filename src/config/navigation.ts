@@ -1,4 +1,3 @@
-
 import {
     LayoutDashboard,
     Boxes,
@@ -15,7 +14,8 @@ export interface NavItem {
     href: string;
     icon: LucideIcon;
     variant?: "default" | "ghost";
-    roles?: Array<"admin" | "editor" | "viewer">;
+    /** Permissions required to see this item. Empty or missing means visible to any signed-in user. */
+    permissions?: string[];
 }
 
 export const navigationConfig: NavItem[] = [
@@ -27,13 +27,14 @@ export const navigationConfig: NavItem[] = [
     {
         title: "Projects",
         href: "/projects",
-        icon: Boxes
+        icon: Boxes,
+        permissions: ["projects:read"]
     },
     {
         title: "Create Project",
         href: "/projects/new",
         icon: PlusCircle,
-        roles: ["admin", "editor"]
+        permissions: ["projects:write"]
     },
     {
         title: "Documentation",
@@ -44,13 +45,13 @@ export const navigationConfig: NavItem[] = [
         title: "Model Settings",
         href: "/llm-providers",
         icon: Cpu,
-        roles: ["admin", "editor"]
+        permissions: ["providers:read"]
     },
     {
         title: "Operations",
         href: "/operations",
         icon: Activity,
-        roles: ["admin"]
+        permissions: ["monitoring:read"]
     },
     {
         title: "Settings",

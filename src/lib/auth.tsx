@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, type AuthLoginRequest, type User } from "@/lib/api";
@@ -7,6 +7,7 @@ interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  hasPermissions: (required: string[]) => boolean;
   login: (payload: AuthLoginRequest) => Promise<void>;
   logout: () => void;
 }
@@ -40,10 +41,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [meQuery.isError, token, queryClient]);
 
+  const user = meQuery.data ?? null;
+
+  const hasPermissions = useCallback(
+    (required: string[]) => {
+      if (required.length === 0) return true;
+      if (!authEnabled) return true;
+      const granted = new Set(user?.permissions ?? []);
+      return required.every((permission) => granted.has(permission));
+    },
+    [authEnabled, user],
+  );
+
   const value = useMemo<AuthContextValue>(() => ({
-    user: meQuery.data || null,
+    user,
     isLoading: healthQuery.isLoading || meQuery.isLoading,
-    isAuthenticated: authEnabled ? Boolean(meQuery.data) : true,
+    isAuthenticated: authEnabled ? Boolean(user) : true,
+    hasPermissions,
     login: async (payload) => {
       const response = await api.login(payload);
       api.setAuthToken(response.access_token);
@@ -55,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(null);
       queryClient.removeQueries({ queryKey: ["auth", "me"] });
     },
-  }), [authEnabled, healthQuery.isLoading, meQuery.data, meQuery.isLoading, queryClient]);
+  }), [authEnabled, healthQuery.isLoading, hasPermissions, meQuery.isLoading, queryClient, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

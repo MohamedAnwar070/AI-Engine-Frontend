@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AuthProvider } from "@/lib/auth";
@@ -70,19 +70,21 @@ const App = () => {
             <MainLayout>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/projects" element={<Projects />} />
-                <Route path="/projects/new" element={<ProtectedRoute roles={["admin", "editor"]}><ProjectForm /></ProtectedRoute>} />
-                <Route path="/projects/:id" element={<ProjectDetail />} />
-                <Route path="/projects/:id/edit" element={<ProtectedRoute roles={["admin", "editor"]}><ProjectForm /></ProtectedRoute>} />
-                <Route path="/projects/:projectId/nodes/new" element={<ProtectedRoute roles={["admin", "editor"]}><NodeForm /></ProtectedRoute>} />
-                <Route path="/projects/:projectId/nodes/:nodeId/edit" element={<ProtectedRoute roles={["admin", "editor"]}><NodeForm /></ProtectedRoute>} />
-                <Route path="/projects/:id/chat" element={<ChatPlayground />} />
-                <Route path="/llm-providers" element={<ProtectedRoute roles={["admin", "editor"]}><LLMProviders /></ProtectedRoute>} />
-                <Route path="/operations" element={<ProtectedRoute roles={["admin"]}><Operations /></ProtectedRoute>} />
+                <Route path="/projects/new" element={<ProtectedRoute permissions={["projects:write"]}><ProjectForm /></ProtectedRoute>} />
+                <Route path="/projects/:id" element={<ProtectedRoute permissions={["projects:read"]}><ProjectDetail /></ProtectedRoute>} />
+                <Route path="/projects/:id/edit" element={<ProtectedRoute permissions={["projects:write"]}><ProjectForm /></ProtectedRoute>} />
+                <Route path="/projects/:projectId/nodes/new" element={<ProtectedRoute permissions={["nodes:write"]}><NodeForm /></ProtectedRoute>} />
+                <Route path="/projects/:projectId/nodes/:nodeId/edit" element={<ProtectedRoute permissions={["nodes:write"]}><NodeForm /></ProtectedRoute>} />
+                <Route path="/projects/:id/chat" element={<ProtectedRoute permissions={["chat:use"]}><ChatPlayground /></ProtectedRoute>} />
+                <Route path="/llm-providers" element={<ProtectedRoute permissions={["providers:read"]}><LLMProviders /></ProtectedRoute>} />
+                <Route path="/operations" element={<ProtectedRoute permissions={["monitoring:read"]}><Operations /></ProtectedRoute>} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/docs" element={<Documentation />} />
                 <Route path="*" element={<NotFound />} />
+                </Route>
               </Routes>
             </MainLayout>
           </BrowserRouter>

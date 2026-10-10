@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
+import { useAuth } from "@/lib/auth";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -8,7 +9,8 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation();
-  const showSidebar = location.pathname !== "/login";
+  const { isAuthenticated, isLoading } = useAuth();
+  const showSidebar = location.pathname !== "/login" && !isLoading && isAuthenticated;
 
   return (
     <div className="relative min-h-screen midnight-mesh selection:bg-primary/30">
