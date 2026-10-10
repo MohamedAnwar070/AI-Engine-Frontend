@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth";
 export function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
-  const { isAuthenticated, hasPermissions, logout } = useAuth();
+  const { user, isAuthenticated, hasPermissions, logout } = useAuth();
 
   const visibleItems = navigationConfig.filter((item) => {
     if (!isAuthenticated) return false;
@@ -132,7 +132,7 @@ export function Sidebar() {
                   exit={{ opacity: 0, width: 0 }}
                   className="flex-1 overflow-hidden whitespace-nowrap"
                 >
-                   <p className="text-sm font-display font-bold text-foreground truncate">{isAuthenticated && user ? user.full_name : "Guest Console"}</p>
+                   <p className="text-sm font-display font-bold text-foreground truncate">{isAuthenticated && user ? user.email : "Guest Console"}</p>
                    <p className="text-[10px] font-sans font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{isAuthenticated && user ? user.role : "Offline"}</p>
                  </motion.div>
                )}
